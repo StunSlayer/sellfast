@@ -1,0 +1,61 @@
+/* Compatibility tokens for retained Supabase/shadcn authentication components. */
+:root {
+  --background: 48 33% 96%;
+  --foreground: 120 5% 10%;
+  --card: 60 100% 99%;
+  --card-foreground: 120 5% 10%;
+  --popover: 60 100% 99%;
+  --popover-foreground: 120 5% 10%;
+  --primary: 143 20% 25%;
+  --primary-foreground: 60 100% 99%;
+  --secondary: 48 19% 91%;
+  --secondary-foreground: 120 5% 10%;
+  --muted: 48 18% 92%;
+  --muted-foreground: 95 4% 43%;
+  --accent: 42 32% 55%;
+  --accent-foreground: 120 5% 10%;
+  --destructive: 5 54% 40%;
+  --destructive-foreground: 60 100% 99%;
+  --border: 70 10% 83%;
+  --input: 70 10% 83%;
+  --ring: 42 32% 48%;
+  --radius: 0rem;
+}
+.dark {
+  --background: 120 5% 10%;
+  --foreground: 60 20% 95%;
+  --card: 120 5% 13%;
+  --card-foreground: 60 20% 95%;
+  --popover: 120 5% 13%;
+  --popover-foreground: 60 20% 95%;
+  --primary: 140 15% 67%;
+  --primary-foreground: 120 5% 10%;
+  --secondary: 120 4% 20%;
+  --secondary-foreground: 60 20% 95%;
+  --muted: 120 4% 20%;
+  --muted-foreground: 100 6% 65%;
+  --accent: 42 28% 45%;
+  --accent-foreground: 60 20% 95%;
+  --destructive: 5 45% 34%;
+  --destructive-foreground: 60 20% 95%;
+  --border: 120 3% 27%;
+  --input: 120 3% 27%;
+  --ring: 42 28% 58%;
+}
+.panel { background: var(--white); border: 1px solid var(--line); padding: 24px; }
+.watch-placeholder {
+  display:flex; height:100%; width:100%; min-height:180px; align-items:center; justify-content:center;
+  flex-direction:column; gap:9px; padding:18px; text-align:center; color:var(--green-dark);
+  background:radial-gradient(circle at 50% 40%, #fffefa 0%, #eeede5 55%, #e0dfd4 100%);
+}
+.watch-placeholder span { font:700 9px Georgia,serif; letter-spacing:.25em; color:var(--gold-dark); }
+.watch-placeholder strong { font:24px Georgia,serif; font-weight:400; letter-spacing:-.02em; }
+.watch-placeholder small { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+.product-gallery-placeholder {
+  grid-column:1/-1; min-height:380px; aspect-ratio:1.3/1; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:12px; text-align:center; padding:28px;
+  background:radial-gradient(circle at 50% 40%, #fffefa 0%, #eeede5 55%, #e0dfd4 100%); color:var(--green-dark);
+}
+.product-gallery-placeholder span { font:700 10px Georgia,serif; letter-spacing:.3em; color:var(--gold-dark); }
+.product-gallery-placeholder strong { font:32px Georgia,serif; font-weight:400; }
+.product-gallery-placeholder small { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }

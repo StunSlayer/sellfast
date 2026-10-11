@@ -1,0 +1,20 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseConfig } from "@/lib/marketplace";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { applyAsSeller } from "./actions";
+export const metadata:Metadata={title:"Become an Approved Seller",description:"Apply to list luxury watches on Sellfast. Seller accounts and individual listings are reviewed before publication."};
+type Props={searchParams:Promise<{error?:string}>};
+export default async function BecomeSellerPage({searchParams}:Props){
+ const p=await searchParams;let email:string|null=null,status:string|null=null;
+ if(hasSupabaseConfig()){const db=await createClient();const {data:a}=await db.auth.getUser();email=a.user?.email||null;if(a.user){const {data}=await db.from("seller_profiles").select("status").eq("user_id",a.user.id).maybeSingle();status=data?.status||null}}
+ return <><SiteHeader/><main><section className="page-hero"><div className="container"><div className="breadcrumbs"><Link href="/">Home</Link><span>/</span><span>Become a seller</span></div><div className="eyebrow">For trusted sellers</div><h1 className="display">Bring your collection to the right audience.</h1><p>Sellfast is a curated marketplace. We review seller applications and each submitted watch before it appears in the public catalogue.</p></div></section>
+ <section className="container form-layout"><div className="form-card"><h2>Seller application</h2><p>Share your contact details and a little about your business or collection.</p>
+ {p.error?<div className="notice error">We could not save the application. Check your details, then try again.</div>:null}{status?<div className="notice"><CheckCircle2 size={17}/> Existing application status: <strong>{status.replace("_"," ")}</strong>.</div>:null}
+ {!email?<div className="panel"><p className="muted">Sign in or create a Sellfast account before applying to become a seller.</p><div className="hero-actions"><Link className="button" href="/auth/login">Sign in <ArrowRight size={14}/></Link><Link className="button button-outline" href="/auth/sign-up">Create account</Link></div></div>:<form action={applyAsSeller}><div className="form-field"><label>Account email</label><input value={email} readOnly/></div><div className="form-field"><label htmlFor="display_name">Your name *</label><input id="display_name" name="display_name" defaultValue={email.split("@")[0]} required minLength={2} maxLength={120}/></div><div className="form-field"><label htmlFor="company_name">Business / trading name</label><input id="company_name" name="company_name" maxLength={180} placeholder="Optional"/></div><div className="form-field"><label htmlFor="contact_phone">Phone / WhatsApp *</label><input id="contact_phone" name="contact_phone" required type="tel" minLength={6} maxLength={40}/></div><label className="checkbox-row"><input type="checkbox" required/> I understand sellers and individual listings are reviewed before publication.</label><button className="button" type="submit">Submit application <ArrowRight size={15}/></button></form>}
+ </div><aside className="side-note"><div className="eyebrow">The seller standard</div><h3 className="display">A marketplace built on trust.</h3><p>Seller access is controlled, listings are moderated, and public availability is managed by the platform.</p><div className="side-list"><div className="side-list-item"><ShieldCheck size={20}/><div><strong>Seller approval</strong><span>Application review before inventory access.</span></div></div><div className="side-list-item"><CheckCircle2 size={20}/><div><strong>Listing review</strong><span>Each watch is reviewed before publication.</span></div></div><div className="side-list-item"><ArrowRight size={20}/><div><strong>Human enquiries</strong><span>Buyers contact the Sellfast concierge.</span></div></div></div></aside></section>
+ </main><SiteFooter/></>;
+}
