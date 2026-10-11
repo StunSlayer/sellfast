@@ -59,3 +59,7 @@
 .product-gallery-placeholder span { font:700 10px Georgia,serif; letter-spacing:.3em; color:var(--gold-dark); }
 .product-gallery-placeholder strong { font:32px Georgia,serif; font-weight:400; }
 .product-gallery-placeholder small { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+
+.signout-link{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:#55594f;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.signout-link:hover{color:var(--gold-dark)}
+.signout-link:disabled{opacity:.6;cursor:wait}
