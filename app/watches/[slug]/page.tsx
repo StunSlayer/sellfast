@@ -3,14 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, CheckCircle2, MessageCircle, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Listing, conditionLabel, formatAED, hasSupabaseConfig, publicListingImage, whatsappHref } from "@/lib/marketplace";
+import { Listing, conditionLabel, formatAED, hasSupabaseConfig, whatsappHref } from "@/lib/marketplace";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { submitPublicInquiry } from "@/app/actions";
 type Props={params:Promise<{slug:string}>;searchParams:Promise<{sent?:string}>};
 export async function generateMetadata({params}:Props):Promise<Metadata>{
  const {slug}=await params;if(!hasSupabaseConfig())return {title:"Luxury Watch"};
- const db=await createClient();const {data}=await db.from("listings").select("title,description,brand:brands(name)").eq("slug",slug).eq("status","published").maybeSingle();
+ const db=await createClient();const {data}=await db.from("listings").select("title,description").eq("slug",slug).eq("status","published").maybeSingle();
  return {title:data?.title||"Luxury Watch",description:data?.description||"View watch details and enquire with the Sellfast concierge.",openGraph:{title:data?.title||"Luxury Watch",description:data?.description||"A curated timepiece at Sellfast."}};
 }
 export default async function WatchDetailPage({params,searchParams}:Props){
@@ -19,10 +19,10 @@ export default async function WatchDetailPage({params,searchParams}:Props){
  if(!data)notFound();const row=data as unknown as Listing;
  const images=(row.listing_images||[]).filter(i=>i.storage_bucket==="watch-images").sort((a,b)=>Number(b.is_primary)-Number(a.is_primary)||a.position-b.position);
  const urls=images.map(i=>db.storage.from("watch-images").getPublicUrl(i.storage_path).data.publicUrl);
- const hero=urls[0]||publicListingImage(db,row),sold=row.availability==="sold",reserved=row.availability==="reserved";
+ const sold=row.availability==="sold",reserved=row.availability==="reserved";
  const message="Hello Sellfast, I am interested in "+row.title+(row.reference_number?" (Ref. "+row.reference_number+")":"")+". Please share availability and next steps.";
  return <><SiteHeader/><main><section className="page-hero"><div className="container"><div className="breadcrumbs"><Link href="/">Home</Link><span>/</span><Link href="/watches">Watches</Link><span>/</span><span>{row.title}</span></div><Link className="text-link" href="/watches"><ArrowLeft size={13}/> Back to collection</Link></div></section>
- <section className="container product-layout"><div className="product-gallery">{urls.length?urls.map((url,i)=><img key={url+i} className="product-gallery-item" src={url} alt={row.title+" view "+(i+1)} loading={i?"lazy":"eager"}/>):<img className="product-gallery-item" src={hero} alt={row.title}/>}</div>
+ <section className="container product-layout"><div className="product-gallery">{urls.length?urls.map((url,i)=><img key={url+i} className="product-gallery-item" src={url} alt={row.title+" view "+(i+1)} loading={i?"lazy":"eager"}/>):<div className="product-gallery-placeholder"><span>SELLFAST · TIMEPIECES</span><strong>{row.brand?.name||"Fine timepiece"}</strong><small>Additional photography available on request</small></div>}</div>
  <div className="product-detail"><div className="eyebrow">{row.brand?.name||"Fine timepiece"}</div><h1 className="display">{row.title}</h1><div className="product-sub">{row.reference_number?"Reference "+row.reference_number+" · ":""}{row.year||"Year not specified"} · {conditionLabel(row.condition)}</div>
  <div className="product-main-price">{formatAED(row.price_aed,row.price_on_request)}</div><span className={"product-status"+(sold?" sold":"")}>{sold?"Sold":reserved?"Reserved · Enquire for updates":"Available to enquire"}</span>
  <p className="product-description">{row.description||"Contact our concierge for further details, additional photographs and to arrange a viewing. Specifications are based on the information provided with this listing."}</p>
