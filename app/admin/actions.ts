@@ -72,7 +72,15 @@ export async function createAdminListing(form:FormData){
 export async function setListingStatus(form:FormData){
  const {db}=await requireAdmin();const id=safeText(form,"listing_id",60),status=safeText(form,"status",30);
  if(!id||!["draft","pending_review","published","rejected","archived"].includes(status))redirect("/admin/listings?error=status");
- if(status==="published"){try{await publishImages(db,id)}catch{redirect("/admin/listings?error=publish")}}
+ if(status==="published"){
+  const {data:listing}=await db.from("listings").select("seller_id").eq("id",id).maybeSingle();
+  if(!listing)redirect("/admin/listings?error=missing");
+  if(listing.seller_id){
+   const {data:seller}=await db.from("seller_profiles").select("status").eq("user_id",listing.seller_id).maybeSingle();
+   if(seller?.status!=="approved")redirect("/admin/listings?error=seller-not-approved");
+  }
+  try{await publishImages(db,id)}catch{redirect("/admin/listings?error=publish")}
+ }
  const update:Record<string,unknown>={status};
  if(status==="published")update.published_at=new Date().toISOString();
  const {error}=await db.from("listings").update(update).eq("id",id);if(error)redirect("/admin/listings?error=update");
