@@ -1,32 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-export default function Page() {
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Thank you for signing up!
-              </CardTitle>
-              <CardDescription>Check your email to confirm</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                You&apos;ve successfully signed up. Please check your email to
-                confirm your account before signing in.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
+import Link from "next/link";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+export default function Page(){return <><SiteHeader/><main className="container" style={{minHeight:"45vh",padding:"55px 0 70px"}}><div className="form-card" style={{maxWidth:540,margin:"0 auto",textAlign:"center"}}><CheckCircle2 size={36} style={{margin:"0 auto 18px",color:"#8c7447"}}/><div className="eyebrow" style={{justifyContent:"center"}}>One more step</div><h1 className="display" style={{fontSize:39,margin:"12px 0"}}>Check your email.</h1><p className="muted" style={{fontSize:12}}>Your account has been created. Confirm your email using the link we send, then sign in to apply as a seller or manage your account. If the message does not arrive, the site administrator needs to configure Supabase email delivery.</p><div className="hero-actions" style={{justifyContent:"center"}}><Link href="/auth/login" className="button">Go to sign in <ArrowRight size={14}/></Link><Link href="/" className="button button-outline">Return to storefront</Link></div></div></main><SiteFooter/></>}
