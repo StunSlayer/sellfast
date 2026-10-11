@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>Sellfast luxury watch icon</title>
+  <rect width="64" height="64" rx="14" fill="#203529"/>
+  <path d="M26 5.5h12l2 9H24l2-9Zm0 53h12l2-9H24l2 9Z" fill="#B49A65"/>
+  <path d="M27.5 7.5h9M27.5 56.5h9" stroke="#F7F6F1" stroke-opacity=".5" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="18.5" fill="#B49A65"/>
+  <circle cx="32" cy="32" r="15.7" fill="#F7F6F1"/>
+  <circle cx="32" cy="32" r="13.7" stroke="#D9CBA8" stroke-width=".8"/>
+  <path d="M32 19v3.2M32 41.8V45M19 32h3.2M41.8 32H45" stroke="#8C7447" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M32 32 24.8 26.5M32 32l7.2-8.5" stroke="#203529" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="2.5" fill="#B49A65" stroke="#203529" stroke-width=".8"/>
+  <path d="M50.5 29.2h3.2a1.2 1.2 0 0 1 1.2 1.2v3.2a1.2 1.2 0 0 1-1.2 1.2h-3.2" fill="#B49A65"/>
+</svg>
