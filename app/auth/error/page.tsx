@@ -1,51 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import { Suspense } from "react";
-
-async function ErrorContent({
-  searchParams,
-}: {
-  searchParams: Promise<{ error: string }>;
-}) {
-  const params = await searchParams;
-
-  return (
-    <>
-      {params?.error ? (
-        <p className="text-sm text-muted-foreground">
-          Code error: {params.error}
-        </p>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          An unspecified error occurred.
-        </p>
-      )}
-    </>
-  );
-}
-
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ error: string }>;
-}) {
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Sorry, something went wrong.
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Suspense>
-                <ErrorContent searchParams={searchParams} />
-              </Suspense>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { AlertTriangle } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+async function ErrorContent({searchParams}:{searchParams:Promise<{error?:string}>}){const params=await searchParams;return <p className="muted" style={{fontSize:12,overflowWrap:"anywhere"}}>{params?.error?params.error:"An unspecified authentication error occurred."}</p>}
+export default function Page({searchParams}:{searchParams:Promise<{error?:string}>}){return <><SiteHeader/><main className="container" style={{minHeight:"45vh",padding:"55px 0 70px"}}><div className="form-card" style={{maxWidth:540,margin:"0 auto"}}><AlertTriangle size={32} style={{color:"#8c7447"}}/><h1 className="display" style={{fontSize:37,margin:"12px 0"}}>We couldn't complete that step.</h1><Suspense><ErrorContent searchParams={searchParams}/></Suspense><div className="hero-actions"><Link href="/auth/login" className="button">Return to sign in</Link><Link href="/" className="button button-outline">Return to storefront</Link></div></div></main><SiteFooter/></>}
