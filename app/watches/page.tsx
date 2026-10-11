@@ -18,7 +18,7 @@ export default async function WatchesPage({searchParams}:Props){
   brands=(brandRows||[]) as Brand[];
   let query=db.from("listings").select("*, brand:brands(name,slug), listing_images(*)").eq("status","published").eq("availability","available");
   if(brandSlug){const b=brands.find(x=>x.slug===brandSlug);query=b?query.eq("brand_id",b.id):query.eq("brand_id","00000000-0000-0000-0000-000000000000")}
-  if(q){const safe=q.replace(/[%_,()]/g," ").replace(/\s+/g," ").trim();if(safe)query=query.or("title.ilike.%"+safe+"%,model.ilike.%"+safe+"%,reference_number.ilike.%"+safe+"%")}
+  if(q){const safe=q.replace(/[^a-zA-Z0-9 -]/g," ").replace(/\s+/g," ").trim();if(safe)query=query.or("title.ilike.%"+safe+"%,model.ilike.%"+safe+"%,reference_number.ilike.%"+safe+"%")}
   if(condition)query=query.eq("condition",condition);
   if(p.min&&Number.isFinite(min)&&min>=0)query=query.gte("price_aed",min);
   if(p.max&&Number.isFinite(max)&&max>=0)query=query.lte("price_aed",max);
