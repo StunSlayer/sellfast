@@ -96,7 +96,13 @@ export async function setSellerStatus(form:FormData){
  const {db}=await requireAdmin();const user_id=safeText(form,"user_id",60),status=safeText(form,"status",30);
  if(!user_id||!["approved","rejected","suspended","pending"].includes(status))redirect("/admin/sellers?error=details");
  const {error}=await db.from("seller_profiles").update({status}).eq("user_id",user_id);
- if(error)redirect("/admin/sellers?error=update");revalidatePath("/admin/sellers");revalidatePath("/seller/dashboard");redirect("/admin/sellers?updated=1");
+ if(error)redirect("/admin/sellers?error=update");
+ if(status!=="approved"){
+  const {error:archiveError}=await db.from("listings").update({status:"archived"}).eq("seller_id",user_id).eq("status","published");
+  if(archiveError)redirect("/admin/sellers?error=archive");
+ }
+ revalidatePath("/admin/sellers");revalidatePath("/seller/dashboard");revalidatePath("/admin/listings");revalidatePath("/watches");revalidatePath("/");
+ redirect("/admin/sellers?updated=1");
 }
 export async function setInquiryStatus(form:FormData){
  const {db,user}=await requireAdmin();const id=safeText(form,"inquiry_id",60),status=safeText(form,"status",30);
