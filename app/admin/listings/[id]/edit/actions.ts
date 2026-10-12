@@ -21,7 +21,7 @@ export async function updateAdminListing(form:FormData){
  const rawMovement=text(form,"movement",30).toLowerCase(),movement=rawMovement==="automatic"?"Automatic":rawMovement==="manual"?"Manual winding":rawMovement==="quartz"?"Quartz":rawMovement==="other"?(text(form,"movement_other",100)||"Other"):"Unknown";
  const rawContents=text(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
  const set_contents_notes=set_contents==="other"?(text(form,"set_contents_notes",250)||null):null;
- if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null))redirect("/admin/listings/"+id+"/edit?error=details");
+ if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null)||(year_status==="known"&&(year===null||year<1900||year>2100)))redirect("/admin/listings/"+id+"/edit?error=details");
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
  for(const f of files)if(!["image/jpeg","image/png","image/webp"].includes(f.type)||f.size>10*1024*1024)redirect("/admin/listings/"+id+"/edit?error=images");
  const {error:saveError}=await db.from("listings").update({
