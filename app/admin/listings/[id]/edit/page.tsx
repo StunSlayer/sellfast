@@ -41,7 +41,7 @@ export default async function EditAdminListingPage({params,searchParams}:Props) 
   if (!row) notFound();
 
   const defaults:Record<string,string> = Object.fromEntries(
-    ["brand_id","title","model","reference_number","year","price_aed","price_on_request","condition","movement","calibre","case_size_mm","case_material","dial_color","bracelet_material","warranty_info","description","box_included","papers_included"]
+    ["brand_id","title","model","reference_number","year","year_status","price_aed","price_on_request","condition","movement","calibre","case_size_mm","case_material","dial_color","bracelet_material","warranty_info","description","set_contents","set_contents_notes","box_included","papers_included"]
       .map(key => [key,row[key]===null||row[key]===undefined ? "" : String(row[key])])
   );
   const images = await Promise.all(((rawImages||[]) as ImageRow[]).map(async image => {
