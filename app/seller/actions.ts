@@ -112,7 +112,7 @@ export async function addSellerListingImages(form: FormData) {
   }
 
   await sendPublishedListingBackToReview(db, listing, user.id);
-  const { data: current } = await db.from("listing_images").select("position,is_primary").eq("listing_id", listing.id).order("position", { ascending: false }).limit(1);
+  const { data: current } = await db.from("listing_images").select("position,is_primary").eq("listing_id", listing.id).order("position", { ascending: false });
   let position = (current?.[0]?.position ?? -1) + 1;
   const hasPrimary = (current || []).some((image: { is_primary: boolean }) => image.is_primary);
   const rows = uploads.map(({ path, file }, index) => ({
