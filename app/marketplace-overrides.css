@@ -111,3 +111,22 @@
  .blog-prose h3{font-size:22px}
  .blog-article-footer{flex-direction:column;align-items:flex-start}
 }
+
+/* Seller image management */
+.seller-image-page .admin-heading .display{font-size:clamp(34px,4vw,48px)}
+.seller-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.seller-photo-card{min-width:0;background:var(--white);border:1px solid var(--line)}
+.seller-photo-preview{position:relative;aspect-ratio:1/1;overflow:hidden;background:#eeede6}
+.seller-photo-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.seller-photo-info{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
+.seller-photo-info>strong{font:20px/1.2 Georgia,serif;font-weight:400}
+.seller-photo-info>span:not(.status-pill){font-size:10px;color:var(--muted)}
+.seller-photo-info form{margin:0}
+.seller-photo-info .inline-actions{gap:5px}
+.seller-replace-form{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:7px;border-top:1px solid var(--line);padding-top:12px}
+.seller-replace-form label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#565a50}
+.seller-replace-form input[type=file]{min-width:0;max-width:100%;font-size:10px}
+.seller-delete-form{padding-top:2px}
+.seller-photo-info .mini-button{display:inline-flex;align-items:center;gap:5px}
+@media(max-width:760px){.seller-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.seller-photo-info{padding:10px}.seller-photo-info>strong{font-size:17px}.seller-replace-form input[type=file]{font-size:9px}}
+@media(max-width:430px){.seller-photo-grid{grid-template-columns:1fr}}
