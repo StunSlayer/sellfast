@@ -47,16 +47,22 @@ async function publishImages(db:Awaited<ReturnType<typeof createClient>>,listing
 export async function createAdminListing(form:FormData){
  const {db,user}=await requireAdmin();const title=safeText(form,"title",180),model=safeText(form,"model",180),brand_id=safeText(form,"brand_id",50);
  const price_aed=numeric(form,"price_aed"),price_on_request=safeText(form,"price_on_request",5)==="true";
+ const rawYearStatus=safeText(form,"year_status",30),year_status=["known","unknown","not_applicable"].includes(rawYearStatus)?rawYearStatus:"unknown";
+ const year=year_status==="known"?numeric(form,"year"):null;
+ const rawMovement=safeText(form,"movement",30).toLowerCase(),movement=rawMovement==="automatic"?"Automatic":rawMovement==="manual"?"Manual winding":rawMovement==="quartz"?"Quartz":rawMovement==="other"?(safeText(form,"movement_other",100)||"Other"):"Unknown";
+ const rawContents=safeText(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
+ const set_contents_notes=set_contents==="other"?(safeText(form,"set_contents_notes",250)||null):null;
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
  if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null))redirect("/admin/listings/new?error=details");
  const slug=slugify(title+" "+(safeText(form,"reference_number",100)||""))+"-"+randomUUID().slice(0,6);
  const record={
   seller_id:null,created_by:user.id,brand_id,slug,title,model,reference_number:safeText(form,"reference_number",120)||null,
-  price_aed,price_on_request,year:numeric(form,"year"),condition:safeText(form,"condition",30)||"excellent",
-  movement:safeText(form,"movement",100)||null,calibre:safeText(form,"calibre",100)||null,case_size_mm:numeric(form,"case_size_mm"),
+  price_aed,price_on_request,year,year_status,condition:safeText(form,"condition",30)||"excellent",
+  movement,calibre:safeText(form,"calibre",100)||null,case_size_mm:numeric(form,"case_size_mm"),
   case_material:safeText(form,"case_material",100)||null,dial_color:safeText(form,"dial_color",100)||null,bracelet_material:safeText(form,"bracelet_material",100)||null,
   warranty_info:safeText(form,"warranty_info",250)||null,description:safeText(form,"description",5000)||null,
-  box_included:safeText(form,"box_included",5)==="true",papers_included:safeText(form,"papers_included",5)==="true",
+  set_contents,set_contents_notes,
+  box_included:set_contents==="full_set"||set_contents==="box_only",papers_included:set_contents==="full_set"||set_contents==="papers_only",
   status:"draft",availability:"available"
  };
  const {data:listing,error}=await db.from("listings").insert(record).select("id").single();
