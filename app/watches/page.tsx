@@ -6,7 +6,14 @@ import { Brand, Listing, hasSupabaseConfig, publicListingImage } from "@/lib/mar
 import { WatchCard } from "@/components/watch-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-export const metadata:Metadata={title:"Shop Luxury Watches",description:"Browse luxury watches, filter by brand, budget and condition, then enquire with the Sellfast concierge."};
+const siteBase=(process.env.NEXT_PUBLIC_SITE_URL||"https://sellfast.in").replace(/\/$/,"");
+export const metadata:Metadata={
+ title:"Shop Luxury Watches in Dubai | Rolex, Cartier & More",
+ description:"Browse available luxury watches in Dubai. Explore Rolex, Patek Philippe, Cartier, Omega and more; filter by price and condition, then enquire with Sellfast.",
+ alternates:{canonical:siteBase+"/watches"},
+ openGraph:{type:"website",url:siteBase+"/watches",siteName:"Sellfast",title:"Shop Luxury Watches in Dubai | Sellfast",description:"Explore available timepieces from leading watch brands and enquire with Sellfast's Dubai concierge."},
+ robots:{index:true,follow:true}
+};
 type Props={searchParams:Promise<{q?:string;brand?:string;min?:string;max?:string;condition?:string;sort?:string}>};
 export default async function WatchesPage({searchParams}:Props){
  const p=await searchParams,q=(p.q||"").trim().slice(0,80),brandSlug=p.brand||"",condition=p.condition||"",sort=p.sort||"newest";
