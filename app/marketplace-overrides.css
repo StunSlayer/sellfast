@@ -130,3 +130,31 @@
 .seller-photo-info .mini-button{display:inline-flex;align-items:center;gap:5px}
 @media(max-width:760px){.seller-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.seller-photo-info{padding:10px}.seller-photo-info>strong{font-size:17px}.seller-replace-form input[type=file]{font-size:9px}}
 @media(max-width:430px){.seller-photo-grid{grid-template-columns:1fr}}
+
+/* Admin inventory image controls */
+.admin-photo-manager{padding:24px;margin:0 0 30px;background:var(--white);border:1px solid var(--line)}
+.admin-photo-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+.admin-photo-heading h2{margin:9px 0 5px;font:30px/1.2 Georgia,serif;font-weight:400}
+.admin-photo-heading p{margin:0;color:var(--muted);font-size:12px}
+.admin-photo-add{display:flex;align-items:flex-end;gap:18px;margin-bottom:22px;padding:16px;background:#f0efe8;border:1px solid var(--line)}
+.admin-photo-add .form-field{flex:1;min-width:0;margin:0}
+.admin-photo-add input[type=file]{font-size:11px}
+.admin-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.admin-photo-card{min-width:0;border:1px solid var(--line);background:var(--white)}
+.admin-photo-preview{position:relative;aspect-ratio:1/1;overflow:hidden;background:#eeede6}
+.admin-photo-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.admin-photo-info{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:13px}
+.admin-photo-title{width:100%;display:flex;flex-direction:column;gap:3px}
+.admin-photo-title strong{font:20px/1.2 Georgia,serif;font-weight:400}
+.admin-photo-title span{font-size:10px;color:var(--muted)}
+.admin-photo-info form{margin:0}
+.admin-photo-info .inline-actions{gap:5px}
+.admin-photo-info .mini-button{display:inline-flex;align-items:center;gap:4px}
+.admin-photo-replace{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:7px;border-top:1px solid var(--line);padding-top:12px}
+.admin-photo-replace label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#565a50}
+.admin-photo-replace input[type=file]{max-width:100%;min-width:0;font-size:10px}
+.admin-photo-delete{padding-top:2px}
+.admin-photo-footnote{color:var(--muted);font-size:11px;line-height:1.7;margin:18px 0 0}
+@media(max-width:900px){.admin-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.admin-photo-manager{padding:14px}.admin-photo-add{flex-direction:column;align-items:stretch;gap:10px}.admin-photo-grid{gap:9px}.admin-photo-info{padding:10px}.admin-photo-title strong{font-size:17px}.admin-photo-replace input[type=file]{font-size:9px}}
+@media(max-width:430px){.admin-photo-grid{grid-template-columns:1fr}}
