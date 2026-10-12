@@ -67,7 +67,7 @@ export async function createAdminListing(form:FormData){
   const {error:publishError}=await db.from("listings").update({status:"published",published_at:new Date().toISOString()}).eq("id",listing.id);
   if(publishError)redirect("/admin/listings/"+listing.id+"/edit?error=publish");
  }
- revalidatePath("/");revalidatePath("/watches");revalidatePath("/admin/listings");redirect("/admin/listings?created=1");
+ revalidatePath("/");revalidatePath("/watches");revalidatePath("/admin/listings");revalidatePath("/sitemap.xml");redirect("/admin/listings?created=1");
 }
 export async function setListingStatus(form:FormData){
  const {db}=await requireAdmin();const id=safeText(form,"listing_id",60),status=safeText(form,"status",30);
@@ -84,7 +84,7 @@ export async function setListingStatus(form:FormData){
  const update:Record<string,unknown>={status};
  if(status==="published")update.published_at=new Date().toISOString();
  const {error}=await db.from("listings").update(update).eq("id",id);if(error)redirect("/admin/listings?error=update");
- revalidatePath("/");revalidatePath("/watches");revalidatePath("/watches/[slug]","page");revalidatePath("/admin/listings");redirect("/admin/listings?updated=1");
+ revalidatePath("/");revalidatePath("/watches");revalidatePath("/watches/[slug]","page");revalidatePath("/admin/listings");revalidatePath("/sitemap.xml");redirect("/admin/listings?updated=1");
 }
 export async function setListingAvailability(form:FormData){
  const {db}=await requireAdmin();const id=safeText(form,"listing_id",60),availability=safeText(form,"availability",30);
