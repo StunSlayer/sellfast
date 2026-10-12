@@ -4,7 +4,8 @@ export function ListingForm({brands,action,submitLabel="Save draft",allowPublish
  const d=(key:string)=>defaults[key]||"";
  const savedMovement=d("movement");
  const movementKey=savedMovement.trim().toLowerCase();
- const movementChoice=["automatic","manual","quartz","unknown"].includes(movementKey)?movementKey:(savedMovement?"other":"unknown");
+ const normalizedMovement=movementKey==="manual winding"||movementKey==="hand wound"||movementKey==="hand-wound"?"manual":movementKey;
+ const movementChoice=["automatic","manual","quartz","unknown"].includes(normalizedMovement)?normalizedMovement:(savedMovement?"other":"unknown");
  const movementOther=movementChoice==="other"?savedMovement:d("movement_other");
  const yearStatus=d("year_status")|| (d("year")?"known":"unknown");
  const setContents=d("set_contents")||"unknown";
