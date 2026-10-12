@@ -12,7 +12,7 @@ export function WatchCard({ listing, imageUrl }: { listing: Listing; imageUrl: s
           <img src={imageUrl} alt={listing.title + " luxury watch"} loading="lazy" />
         ) : (
           <div className="watch-placeholder" aria-label="Photographs available on request">
-            <span>SELLFAST</span>
+            <span>Sellfast</span>
             <strong>{listing.brand?.name || "Fine timepiece"}</strong>
             <small>Photography on request</small>
           </div>
