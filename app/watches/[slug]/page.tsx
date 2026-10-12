@@ -10,7 +10,7 @@ import { submitPublicInquiry } from "@/app/actions";
 type Props={params:Promise<{slug:string}>;searchParams:Promise<{sent?:string}>};
 export async function generateMetadata({params}:Props):Promise<Metadata>{
  const {slug}=await params;
- const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://sellfast.in").replace(/\\/$/,"");
+ const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://sellfast.in").replace(/\/$/,"");
  if(!hasSupabaseConfig())return {title:"Luxury Watch | Sellfast",robots:{index:false,follow:true}};
  const db=await createClient();
  const {data}=await db.from("listings").select("title,description,reference_number,year,condition,price_aed,price_on_request,brand:brands(name),listing_images(storage_bucket,storage_path,position,is_primary)").eq("slug",slug).eq("status","published").maybeSingle();
@@ -19,7 +19,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
  const brand=joined.brand?.name||"Luxury watch";
  const detail=[joined.reference_number?"ref. "+joined.reference_number:null,joined.year?String(joined.year):null,conditionLabel(joined.condition)].filter(Boolean).join(" · ");
  const fallback=brand+" "+joined.title+(detail?" ("+detail+")":"")+". Explore this luxury watch in Dubai and enquire with Sellfast's concierge.";
- const description=(joined.description||fallback).replace(/\\s+/g," ").trim().slice(0,155);
+ const description=(joined.description||fallback).replace(/\s+/g," ").trim().slice(0,155);
  const image=(joined.listing_images||[]).filter(i=>i.storage_bucket==="watch-images").sort((a,b)=>Number(b.is_primary)-Number(a.is_primary)||a.position-b.position)[0];
  const imageUrl=image?db.storage.from("watch-images").getPublicUrl(image.storage_path).data.publicUrl:undefined;
  const title=(brand+" "+joined.title+" | Luxury Watches in Dubai").slice(0,70);
@@ -38,7 +38,7 @@ export default async function WatchDetailPage({params,searchParams}:Props){
  const images=(row.listing_images||[]).filter(i=>i.storage_bucket==="watch-images").sort((a,b)=>Number(b.is_primary)-Number(a.is_primary)||a.position-b.position);
  const urls=images.map(i=>db.storage.from("watch-images").getPublicUrl(i.storage_path).data.publicUrl);
  const sold=row.availability==="sold",reserved=row.availability==="reserved";
- const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://sellfast.in").replace(/\\/$/,"");
+ const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://sellfast.in").replace(/\/$/,"");
  const productJsonLd={
   "@context":"https://schema.org",
   "@type":"Product",
