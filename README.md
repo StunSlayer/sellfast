@@ -25,10 +25,10 @@ An enquiry-led luxury-watch marketplace built with Next.js, TypeScript, Supabase
 - `/admin` administrator overview and inventory tools
 - `/admin/sellers` seller approvals
 - `/admin/inquiries` lead management
-- `/admin/brands` brand management
+- `/admin/brands` brand management\n- `/admin/blog` SEO journal, drafts and publishing\n- `/blog` public article journal\n- `/blog/[slug]` public SEO-friendly article
 
 ## Database and security
-Schema and Storage migrations are in `supabase/migrations`. They have been applied to the current Supabase project. Do not rewrite an already-applied migration; add a timestamped migration for future schema changes.
+Schema and Storage migrations are in `supabase/migrations`. The core marketplace migrations have been applied to the current Supabase project. Before using the SEO journal, apply `supabase/migrations/20261012000300_blog_posts.sql` once in Supabase SQL Editor. Do not rerun an already-applied migration; add a timestamped migration for future schema changes. The blog migration grants public read access only to published articles and admin-only write access through the `is_admin()` policy.
 
 Before production, test with anonymous, approved seller, unapproved seller and administrator accounts. Verify row-level access, storage paths, image publication, email confirmation, rate-limiting and backups.
 
