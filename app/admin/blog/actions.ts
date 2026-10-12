@@ -22,7 +22,8 @@ function safeCanonical(input: string) {
   if (!input) return null;
   try {
     const url = new URL(input);
-    if (url.protocol !== "https:") return null;
+    const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://sellfast.in");
+    if (url.protocol !== "https:" || url.origin !== siteUrl.origin) return null;
     return url.toString();
   } catch {
     return null;
