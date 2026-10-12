@@ -3,8 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type ListingImage = { id:string; listing_id:string; storage_bucket:"seller-uploads"|"watch-images"; storage_path:string; alt_text:string|null; position:number; is_primary:boolean };
 export type Listing = {
  id:string; slug:string; title:string; model:string; reference_number:string|null; price_aed:number|null; price_on_request:boolean;
- year:number|null; condition:string; movement:string|null; calibre:string|null; case_size_mm:number|null; case_material:string|null;
- dial_color:string|null; bracelet_material:string|null; box_included:boolean; papers_included:boolean; warranty_info:string|null;
+ year:number|null; year_status?:"known"|"unknown"|"not_applicable"; condition:string; movement:string|null; calibre:string|null; case_size_mm:number|null; case_material:string|null;
+ dial_color:string|null; bracelet_material:string|null; box_included:boolean; papers_included:boolean; set_contents?:"full_set"|"watch_only"|"box_only"|"papers_only"|"other"|"unknown"; set_contents_notes?:string|null; warranty_info:string|null;
  description:string|null; status:string; availability:string; created_at:string; published_at:string|null; brand_id:string;
  brand?:{name:string;slug:string}|null; listing_images?:ListingImage[];
 };
