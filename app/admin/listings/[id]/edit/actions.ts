@@ -57,9 +57,6 @@ async function requireAdminPhotoContext(form: FormData) {
     .eq("id", id)
     .maybeSingle();
   if (!listing) redirect("/admin/listings?error=missing");
-  if (listing.availability !== "available") {
-    redirect("/admin/listings/" + id + "/edit?error=photo-locked");
-  }
   return { db, user, listing };
 }
 
