@@ -16,15 +16,20 @@ export async function updateAdminListing(form:FormData){
  const {db,user}=await adminClient(),id=text(form,"listing_id",60);if(!id)redirect("/admin/listings");
  const {data:old}=await db.from("listings").select("id,slug,status").eq("id",id).maybeSingle();if(!old)redirect("/admin/listings?error=missing");
  const title=text(form,"title",180),model=text(form,"model",180),brand_id=text(form,"brand_id",60),price_aed=number(form,"price_aed"),price_on_request=text(form,"price_on_request",5)==="true";
+ const rawYearStatus=text(form,"year_status",30),year_status=["known","unknown","not_applicable"].includes(rawYearStatus)?rawYearStatus:"unknown";
+ const year=year_status==="known"?number(form,"year"):null;
+ const rawMovement=text(form,"movement",30).toLowerCase(),movement=rawMovement==="automatic"?"Automatic":rawMovement==="manual"?"Manual winding":rawMovement==="quartz"?"Quartz":rawMovement==="other"?(text(form,"movement_other",100)||"Other"):"Unknown";
+ const rawContents=text(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
+ const set_contents_notes=set_contents==="other"?(text(form,"set_contents_notes",250)||null):null;
  if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null))redirect("/admin/listings/"+id+"/edit?error=details");
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
  for(const f of files)if(!["image/jpeg","image/png","image/webp"].includes(f.type)||f.size>10*1024*1024)redirect("/admin/listings/"+id+"/edit?error=images");
  const {error:saveError}=await db.from("listings").update({
-  brand_id,title,model,reference_number:text(form,"reference_number",120)||null,price_aed,price_on_request,year:number(form,"year"),
-  condition:text(form,"condition",30)||"excellent",movement:text(form,"movement",100)||null,calibre:text(form,"calibre",100)||null,
+  brand_id,title,model,reference_number:text(form,"reference_number",120)||null,price_aed,price_on_request,year,year_status,
+  condition:text(form,"condition",30)||"excellent",movement,calibre:text(form,"calibre",100)||null,
   case_size_mm:number(form,"case_size_mm"),case_material:text(form,"case_material",100)||null,dial_color:text(form,"dial_color",100)||null,
   bracelet_material:text(form,"bracelet_material",100)||null,warranty_info:text(form,"warranty_info",250)||null,
-  description:text(form,"description",5000)||null,box_included:text(form,"box_included",5)==="true",papers_included:text(form,"papers_included",5)==="true"
+  description:text(form,"description",5000)||null,set_contents,set_contents_notes,box_included:set_contents==="full_set"||set_contents==="box_only",papers_included:set_contents==="full_set"||set_contents==="papers_only"
  }).eq("id",id);
  if(saveError)redirect("/admin/listings/"+id+"/edit?error=save");
  if(files.length){
