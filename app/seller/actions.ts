@@ -177,6 +177,10 @@ export async function deleteSellerListingImage(form: FormData) {
   if (removeError) redirect("/seller/listings/" + listing.id + "/images?error=delete-storage");
   const { error } = await db.from("listing_images").delete().eq("id", image.id).eq("listing_id", listing.id);
   if (error) redirect("/seller/listings/" + listing.id + "/images?error=delete-metadata");
+  if (image.is_primary) {
+    const { data: nextCover } = await db.from("listing_images").select("id").eq("listing_id", listing.id).order("position", { ascending: true }).limit(1).maybeSingle();
+    if (nextCover) await db.from("listing_images").update({ is_primary: true }).eq("id", nextCover.id).eq("listing_id", listing.id);
+  }
   refreshSellerImagePages(listing.id);
   redirect("/seller/listings/" + listing.id + "/images?deleted=1");
 }
