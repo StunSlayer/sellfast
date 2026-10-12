@@ -71,7 +71,7 @@ export default async function SellerListingImagesPage({ params, searchParams }: 
     {listing.availability !== "available" ? <div className="notice error">This listing is {listing.availability}; photo changes are disabled until it is available again.</div> : <>
       <form action={addSellerListingImages} encType="multipart/form-data" className="admin-form" style={{maxWidth:"none",marginBottom:22}}>
         <input type="hidden" name="listing_id" value={listing.id}/>
-        <div className="form-field"><label htmlFor="add-photos">Add photographs</label><input id="add-photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required/><span className="muted" style={{fontSize:10}}>JPEG, PNG or WebP. Up to eight files per upload, 10 MB per image.</span></div>
+        <div className="form-field"><label htmlFor="add-photos">Add photographs</label><input id="add-photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required/><span className="muted" style={{fontSize:10}}>JPEG, PNG or WebP. Up to four files per upload, 10 MB per image.</span></div>
         <button className="button" type="submit"><ImagePlus size={15}/> Upload photographs</button>
       </form>
 
