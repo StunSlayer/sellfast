@@ -63,3 +63,11 @@
 .signout-link{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:#55594f;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
 .signout-link:hover{color:var(--gold-dark)}
 .signout-link:disabled{opacity:.6;cursor:wait}
+
+/* Mobile homepage: bring the live product collection directly below the header. */
+@media (max-width: 760px) {
+  .hero,
+  .trust-row {
+    display: none !important;
+  }
+}
