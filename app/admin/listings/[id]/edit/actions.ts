@@ -42,3 +42,207 @@ export async function updateAdminListing(form:FormData){
  }
  revalidatePath("/");revalidatePath("/watches");revalidatePath("/admin/listings");revalidatePath("/sitemap.xml");if(old.slug)revalidatePath("/watches/"+old.slug);redirect("/admin/listings?updated=1");
 }
+
+type AdminListingImage = {
+  id: string; listing_id: string; storage_bucket: "seller-uploads" | "watch-images";
+  storage_path: string; alt_text: string | null; position: number; is_primary: boolean;
+};
+
+async function requireAdminPhotoContext(form: FormData) {
+  const { db, user } = await adminClient();
+  const id = text(form, "listing_id", 60);
+  if (!id) redirect("/admin/listings");
+  const { data: listing } = await db.from("listings")
+    .select("id,title,slug,status,availability")
+    .eq("id", id)
+    .maybeSingle();
+  if (!listing) redirect("/admin/listings?error=missing");
+  if (listing.availability !== "available") {
+    redirect("/admin/listings/" + id + "/edit?error=photo-locked");
+  }
+  return { db, user, listing };
+}
+
+async function getAdminPhoto(db: Awaited<ReturnType<typeof createClient>>, listingId: string, imageId: string) {
+  const { data } = await db.from("listing_images")
+    .select("id,listing_id,storage_bucket,storage_path,alt_text,position,is_primary")
+    .eq("id", imageId)
+    .eq("listing_id", listingId)
+    .maybeSingle();
+  return data as AdminListingImage | null;
+}
+
+function validAdminPhoto(file: File) {
+  return ["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    && file.size > 0
+    && file.size <= 10 * 1024 * 1024;
+}
+
+function refreshAdminPhotoPages(id: string, slug: string) {
+  revalidatePath("/admin/listings");
+  revalidatePath("/admin/listings/" + id + "/edit");
+  revalidatePath("/watches");
+  revalidatePath("/watches/[slug]", "page");
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/");
+  if (slug) revalidatePath("/watches/" + slug);
+}
+
+export async function addAdminListingImages(form: FormData) {
+  const { db, user, listing } = await requireAdminPhotoContext(form);
+  const id = listing.id;
+  const files = form.getAll("photos").filter((v): v is File =>
+    typeof v === "object" && v !== null && "size" in v && (v as File).size > 0,
+  );
+  if (!files.length || files.length > 4 || files.some((file) => !validAdminPhoto(file))) {
+    redirect("/admin/listings/" + id + "/edit?error=photo-files");
+  }
+
+  const { data: existing } = await db.from("listing_images")
+    .select("position,is_primary")
+    .eq("listing_id", id)
+    .order("position", { ascending: false });
+  let position = (existing?.[0]?.position ?? -1) + 1;
+  const hasPrimary = (existing || []).some((image: { is_primary: boolean }) => image.is_primary);
+  const usePublicBucket = listing.status === "published";
+  const bucket = usePublicBucket ? "watch-images" : "seller-uploads";
+  const rows: Array<{listing_id:string;storage_bucket:string;storage_path:string;alt_text:string;position:number;is_primary:boolean}> = [];
+  const uploadedPaths: string[] = [];
+
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    const path = usePublicBucket
+      ? id + "/" + randomUUID() + "-" + fileName(file.name)
+      : user.id + "/" + id + "/" + randomUUID() + "-" + fileName(file.name);
+    const { error } = await db.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
+    if (error) {
+      if (uploadedPaths.length) await db.storage.from(bucket).remove(uploadedPaths);
+      redirect("/admin/listings/" + id + "/edit?error=photo-upload");
+    }
+    uploadedPaths.push(path);
+    rows.push({
+      listing_id: id,
+      storage_bucket: bucket,
+      storage_path: path,
+      alt_text: (file.name || listing.title).slice(0, 250),
+      position: position++,
+      is_primary: !hasPrimary && index === 0,
+    });
+  }
+  const { error: insertError } = await db.from("listing_images").insert(rows);
+  if (insertError) {
+    await db.storage.from(bucket).remove(uploadedPaths);
+    redirect("/admin/listings/" + id + "/edit?error=photo-metadata");
+  }
+  refreshAdminPhotoPages(id, listing.slug);
+  redirect("/admin/listings/" + id + "/edit?photos=added");
+}
+
+export async function replaceAdminListingImage(form: FormData) {
+  const { db, user, listing } = await requireAdminPhotoContext(form);
+  const id = listing.id;
+  const imageId = text(form, "image_id", 60);
+  const file = form.get("photo");
+  if (!imageId || !(file instanceof File) || !validAdminPhoto(file)) {
+    redirect("/admin/listings/" + id + "/edit?error=photo-files");
+  }
+  const image = await getAdminPhoto(db, id, imageId);
+  if (!image) redirect("/admin/listings/" + id + "/edit?error=photo-missing");
+
+  const bucket = image.storage_bucket;
+  const path = bucket === "watch-images"
+    ? id + "/" + randomUUID() + "-" + fileName(file.name)
+    : user.id + "/" + id + "/" + randomUUID() + "-" + fileName(file.name);
+  const { error: uploadError } = await db.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
+  if (uploadError) redirect("/admin/listings/" + id + "/edit?error=photo-upload");
+
+  const { error: updateError } = await db.from("listing_images")
+    .update({ storage_path: path, alt_text: file.name.slice(0, 250) })
+    .eq("id", image.id)
+    .eq("listing_id", id);
+  if (updateError) {
+    await db.storage.from(bucket).remove([path]);
+    redirect("/admin/listings/" + id + "/edit?error=photo-metadata");
+  }
+  const { error: removeOldError } = await db.storage.from(image.storage_bucket).remove([image.storage_path]);
+  if (removeOldError) {
+    // The new image is already connected; leaving the old object is a harmless orphan
+    // that can be cleaned up later, so keep the listing functional.
+  }
+  refreshAdminPhotoPages(id, listing.slug);
+  redirect("/admin/listings/" + id + "/edit?photos=replaced");
+}
+
+export async function deleteAdminListingImage(form: FormData) {
+  const { db, listing } = await requireAdminPhotoContext(form);
+  const id = listing.id;
+  const imageId = text(form, "image_id", 60);
+  const image = imageId ? await getAdminPhoto(db, id, imageId) : null;
+  if (!image) redirect("/admin/listings/" + id + "/edit?error=photo-missing");
+
+  const { error: metadataError } = await db.from("listing_images").delete()
+    .eq("id", image.id)
+    .eq("listing_id", id);
+  if (metadataError) redirect("/admin/listings/" + id + "/edit?error=photo-metadata");
+
+  const { error: storageError } = await db.storage.from(image.storage_bucket).remove([image.storage_path]);
+  if (storageError) {
+    // Metadata is gone, so the photo disappears from the listing; object cleanup can be retried.
+  }
+  if (image.is_primary) {
+    const { data: nextPhoto } = await db.from("listing_images")
+      .select("id")
+      .eq("listing_id", id)
+      .order("position", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (nextPhoto) {
+      await db.from("listing_images").update({ is_primary: true }).eq("id", nextPhoto.id);
+    }
+  }
+  refreshAdminPhotoPages(id, listing.slug);
+  redirect("/admin/listings/" + id + "/edit?photos=deleted");
+}
+
+export async function setAdminListingCover(form: FormData) {
+  const { db, listing } = await requireAdminPhotoContext(form);
+  const id = listing.id;
+  const imageId = text(form, "image_id", 60);
+  const image = imageId ? await getAdminPhoto(db, id, imageId) : null;
+  if (!image) redirect("/admin/listings/" + id + "/edit?error=photo-missing");
+
+  const { error: clearError } = await db.from("listing_images")
+    .update({ is_primary: false })
+    .eq("listing_id", id)
+    .eq("is_primary", true);
+  if (clearError) redirect("/admin/listings/" + id + "/edit?error=photo-cover");
+  const { error } = await db.from("listing_images").update({ is_primary: true }).eq("id", image.id).eq("listing_id", id);
+  if (error) redirect("/admin/listings/" + id + "/edit?error=photo-cover");
+  refreshAdminPhotoPages(id, listing.slug);
+  redirect("/admin/listings/" + id + "/edit?photos=cover");
+}
+
+export async function moveAdminListingImage(form: FormData) {
+  const { db, listing } = await requireAdminPhotoContext(form);
+  const id = listing.id;
+  const imageId = text(form, "image_id", 60);
+  const direction = text(form, "direction", 5);
+  if (!imageId || !["up", "down"].includes(direction)) redirect("/admin/listings/" + id + "/edit?error=photo-order");
+  const { data: rows } = await db.from("listing_images").select("id,position").eq("listing_id", id).order("position", { ascending: true });
+  const images = rows || [];
+  const index = images.findIndex((row: { id: string }) => row.id === imageId);
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || swapIndex < 0 || swapIndex >= images.length) redirect("/admin/listings/" + id + "/edit");
+
+  const current = images[index] as { id: string; position: number };
+  const other = images[swapIndex] as { id: string; position: number };
+  const temporary = Math.max(...images.map((row: { position: number }) => row.position), 0) + images.length + 5;
+  const first = await db.from("listing_images").update({ position: temporary }).eq("id", current.id).eq("listing_id", id);
+  if (first.error) redirect("/admin/listings/" + id + "/edit?error=photo-order");
+  const second = await db.from("listing_images").update({ position: current.position }).eq("id", other.id).eq("listing_id", id);
+  if (second.error) redirect("/admin/listings/" + id + "/edit?error=photo-order");
+  const third = await db.from("listing_images").update({ position: other.position }).eq("id", current.id).eq("listing_id", id);
+  if (third.error) redirect("/admin/listings/" + id + "/edit?error=photo-order");
+  refreshAdminPhotoPages(id, listing.slug);
+  redirect("/admin/listings/" + id + "/edit?photos=ordered");
+}
