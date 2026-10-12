@@ -40,5 +40,5 @@ export async function updateAdminListing(form:FormData){
   const {error}=await db.from("listing_images").insert(rows);if(error)redirect("/admin/listings/"+id+"/edit?error=images");
   if(old.status==="published"){const {error:unpublishError}=await db.from("listings").update({status:"draft"}).eq("id",id);if(unpublishError)redirect("/admin/listings/"+id+"/edit?error=save")}
  }
- revalidatePath("/");revalidatePath("/watches");revalidatePath("/admin/listings");redirect("/admin/listings?updated=1");
+ revalidatePath("/");revalidatePath("/watches");revalidatePath("/admin/listings");revalidatePath("/sitemap.xml");if(old.slug)revalidatePath("/watches/"+old.slug);redirect("/admin/listings?updated=1");
 }
