@@ -18,7 +18,7 @@ export async function submitSellerListing(form:FormData){
  const rawContents=text(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
  const set_contents_notes=set_contents==="other"?(text(form,"set_contents_notes",250)||null):null;
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
- if(title.length<3||!model||!brand_id||files.length===0||(!price_on_request&&price_aed===null))redirect("/seller/listings/new?error=details");
+ if(title.length<3||!model||!brand_id||files.length===0||(!price_on_request&&price_aed===null)||(year_status==="known"&&(year===null||year<1900||year>2100)))redirect("/seller/listings/new?error=details");
  for(const file of files)if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10*1024*1024)redirect("/seller/listings/new?error=images");
  const slug=slugify(title+" "+(text(form,"reference_number",100)||""))+"-"+randomUUID().slice(0,6);
  const {data:listing,error}=await db.from("listings").insert({
