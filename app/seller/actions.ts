@@ -12,14 +12,19 @@ export async function submitSellerListing(form:FormData){
  const {data:profile}=await db.from("seller_profiles").select("status").eq("user_id",auth.user.id).maybeSingle();
  if(profile?.status!=="approved")redirect("/seller/dashboard?error=not-approved");
  const title=text(form,"title",180),model=text(form,"model",180),brand_id=text(form,"brand_id",60),price_aed=num(form,"price_aed"),price_on_request=text(form,"price_on_request",5)==="true";
+ const rawYearStatus=text(form,"year_status",30),year_status=["known","unknown","not_applicable"].includes(rawYearStatus)?rawYearStatus:"unknown";
+ const year=year_status==="known"?num(form,"year"):null;
+ const rawMovement=text(form,"movement",30).toLowerCase(),movement=rawMovement==="automatic"?"Automatic":rawMovement==="manual"?"Manual winding":rawMovement==="quartz"?"Quartz":rawMovement==="other"?(text(form,"movement_other",100)||"Other"): "Unknown";
+ const rawContents=text(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
+ const set_contents_notes=set_contents==="other"?(text(form,"set_contents_notes",250)||null):null;
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
  if(title.length<3||!model||!brand_id||files.length===0||(!price_on_request&&price_aed===null))redirect("/seller/listings/new?error=details");
  for(const file of files)if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10*1024*1024)redirect("/seller/listings/new?error=images");
  const slug=slugify(title+" "+(text(form,"reference_number",100)||""))+"-"+randomUUID().slice(0,6);
  const {data:listing,error}=await db.from("listings").insert({
   seller_id:auth.user.id,created_by:auth.user.id,brand_id,slug,title,model,reference_number:text(form,"reference_number",120)||null,
-  price_aed,price_on_request,year:num(form,"year"),condition:text(form,"condition",30)||"excellent",
-  movement:text(form,"movement",100)||null,calibre:text(form,"calibre",100)||null,case_size_mm:num(form,"case_size_mm"),
+  price_aed,price_on_request,year,year_status,condition:text(form,"condition",30)||"excellent",
+  movement,calibre:text(form,"calibre",100)||null,case_size_mm:num(form,"case_size_mm"),
   case_material:text(form,"case_material",100)||null,dial_color:text(form,"dial_color",100)||null,bracelet_material:text(form,"bracelet_material",100)||null,
   warranty_info:text(form,"warranty_info",250)||null,description:text(form,"description",5000)||null,
   box_included:text(form,"box_included",5)==="true",papers_included:text(form,"papers_included",5)==="true",
