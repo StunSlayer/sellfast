@@ -53,7 +53,7 @@ export async function createAdminListing(form:FormData){
  const rawContents=safeText(form,"set_contents",30),set_contents=["full_set","watch_only","box_only","papers_only","other","unknown"].includes(rawContents)?rawContents:"unknown";
  const set_contents_notes=set_contents==="other"?(safeText(form,"set_contents_notes",250)||null):null;
  const files=form.getAll("photos").filter((v):v is File=>typeof v==="object"&&v!==null&&"size" in v&&(v as File).size>0);
- if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null))redirect("/admin/listings/new?error=details");
+ if(title.length<3||!model||!brand_id||(!price_on_request&&price_aed===null)||(year_status==="known"&&(year===null||year<1900||year>2100)))redirect("/admin/listings/new?error=details");
  const slug=slugify(title+" "+(safeText(form,"reference_number",100)||""))+"-"+randomUUID().slice(0,6);
  const record={
   seller_id:null,created_by:user.id,brand_id,slug,title,model,reference_number:safeText(form,"reference_number",120)||null,
