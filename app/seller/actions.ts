@@ -100,7 +100,7 @@ async function getSellerPhoto(db: Awaited<ReturnType<typeof createClient>>, list
 export async function addSellerListingImages(form: FormData) {
   const { db, user, listing } = await requireImageManager(form);
   const files = form.getAll("photos").filter((v): v is File => typeof v === "object" && v !== null && "size" in v && (v as File).size > 0);
-  if (!files.length || files.length > 8 || files.some(file => !validImage(file))) {
+  if (!files.length || files.length > 4 || files.some(file => !validImage(file))) {
     redirect("/seller/listings/" + listing.id + "/images?error=files");
   }
 
