@@ -27,7 +27,7 @@ export async function submitSellerListing(form:FormData){
   movement,calibre:text(form,"calibre",100)||null,case_size_mm:num(form,"case_size_mm"),
   case_material:text(form,"case_material",100)||null,dial_color:text(form,"dial_color",100)||null,bracelet_material:text(form,"bracelet_material",100)||null,
   warranty_info:text(form,"warranty_info",250)||null,description:text(form,"description",5000)||null,
-  box_included:text(form,"box_included",5)==="true",papers_included:text(form,"papers_included",5)==="true",
+  set_contents,set_contents_notes,box_included:set_contents==="full_set"||set_contents==="box_only",papers_included:set_contents==="full_set"||set_contents==="papers_only",
   status:"pending_review",availability:"available"
  }).select("id").single();
  if(error||!listing)redirect("/seller/listings/new?error=save");
