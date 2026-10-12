@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, FilePlus2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatAED } from "@/lib/marketplace";
 
 type Props = { searchParams: Promise<{saved?:string}> };
 export default async function AdminBlogPage({searchParams}:Props) {
