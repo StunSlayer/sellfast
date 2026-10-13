@@ -66,7 +66,11 @@ export async function createAdminListing(form:FormData){
   status:"draft",availability:"available"
  };
  const {data:listing,error}=await db.from("listings").insert(record).select("id").single();
- if(error||!listing)redirect("/admin/listings/new?error=save");
+ if(error||!listing){
+  console.error("[Sellfast] create listing insert failed", {code:error?.code,message:error?.message});
+  const missingSchema=error?.code==="42703"||error?.code==="PGRST204"||/column .* does not exist|schema cache/i.test(error?.message||"");
+  redirect(missingSchema?"/admin/listings/new?error=schema":"/admin/listings/new?error=save");
+ }
  try{await savePrivateImages(db,user.id,listing.id,files)}catch{redirect("/admin/listings/new?error=images")}
  if(safeText(form,"publish_now",5)==="true"){
   try{await publishImages(db,listing.id)}catch{redirect("/admin/listings/"+listing.id+"/edit?error=publish")}
