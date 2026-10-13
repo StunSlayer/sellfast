@@ -15,7 +15,7 @@ import {
 type Props = { params: Promise<{id:string}>; searchParams: Promise<{error?:string;photos?:string}> };
 type ImageRow = { id:string; storage_bucket:"seller-uploads"|"watch-images"; storage_path:string; position:number; is_primary:boolean; alt_text:string|null };
 const errors: Record<string,string> = {
-  details:"Check the required listing details.",
+  details:"Some required fields are missing or invalid. Review the fields highlighted in red.",
   save:"Listing details could not be saved. Check the required fields and try again.",
   schema:"The database is missing the latest listing fields. Apply migration 20261012000500_listing_year_and_set_contents.sql in Supabase, then retry.",
   images:"Image metadata could not be saved.",
