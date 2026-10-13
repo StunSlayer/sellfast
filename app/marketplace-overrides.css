@@ -158,3 +158,15 @@
 @media(max-width:900px){.admin-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.admin-photo-manager{padding:14px}.admin-photo-add{flex-direction:column;align-items:stretch;gap:10px}.admin-photo-grid{gap:9px}.admin-photo-info{padding:10px}.admin-photo-title strong{font-size:17px}.admin-photo-replace input[type=file]{font-size:9px}}
 @media(max-width:430px){.admin-photo-grid{grid-template-columns:1fr}}
+
+/* Clear inline validation for inventory forms */
+.form-validation-note,.validation-guidance{margin:0 0 16px;padding:12px 14px;background:#f7e9e7;border-left:3px solid #b83a32;color:#8d2d28;font-size:12px;line-height:1.65}
+.validation-attempted .form-field:has(:invalid) label{color:#b42318}
+.validation-attempted .form-field:has(:invalid) input:not([type=checkbox]):not([type=radio]),
+.validation-attempted .form-field:has(:invalid) select,
+.validation-attempted .form-field:has(:invalid) textarea{border-color:#c43d36!important;box-shadow:0 0 0 1px rgba(196,61,54,.12);background:#fff9f8}
+.validation-attempted .form-field:has(:invalid) input[type=file]{outline:1px solid #c43d36;outline-offset:3px}
+.validation-attempted .form-field:has(:invalid) label:after{content:" · Required / invalid";font-size:9px;letter-spacing:0;text-transform:none;color:#b42318}
+.validation-attempted .form-field:has(:invalid) input:focus,
+.validation-attempted .form-field:has(:invalid) select:focus,
+.validation-attempted .form-field:has(:invalid) textarea:focus{outline:2px solid rgba(196,61,54,.18);outline-offset:1px}
