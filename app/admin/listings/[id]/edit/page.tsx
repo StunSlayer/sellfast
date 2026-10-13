@@ -105,6 +105,6 @@ export default async function EditAdminListingPage({params,searchParams}:Props) 
     </section>
 
     <div className="admin-heading" style={{marginTop:34}}><div><div className="eyebrow">Listing details</div><h2 className="display" style={{fontSize:32}}>Product information</h2><p>Current listing status: <strong>{row.status}</strong></p></div></div>
-    <ListingForm brands={brands||[]} action={updateAdminListing} defaults={defaults} submitLabel="Save listing details" allowPublish={true} showPublishToggle={false} hidePhotoField={true}/>
+    <ListingForm brands={brands||[]} action={updateAdminListing} defaults={defaults} submitLabel="Save listing details" allowPublish={true} showPublishToggle={false} hidePhotoField={true} serverError={p.error}/>
   </>;
 }
