@@ -31,7 +31,11 @@ export async function updateAdminListing(form:FormData){
   bracelet_material:text(form,"bracelet_material",100)||null,warranty_info:text(form,"warranty_info",250)||null,
   description:text(form,"description",5000)||null,set_contents,set_contents_notes,box_included:set_contents==="full_set"||set_contents==="box_only",papers_included:set_contents==="full_set"||set_contents==="papers_only"
  }).eq("id",id);
- if(saveError)redirect("/admin/listings/"+id+"/edit?error=save");
+ if(saveError){
+  console.error("[Sellfast] update listing failed", {code:saveError.code,message:saveError.message});
+  const missingSchema=saveError.code==="42703"||saveError.code==="PGRST204"||/column .* does not exist|schema cache/i.test(saveError.message||"");
+  redirect("/admin/listings/"+id+"/edit?error="+(missingSchema?"schema":"save"));
+ }
  if(files.length){
   const {data:current}=await db.from("listing_images").select("position").eq("listing_id",id).order("position",{ascending:false}).limit(1);
   let position=(current?.[0]?.position??-1)+1;
