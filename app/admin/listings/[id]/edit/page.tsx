@@ -16,7 +16,8 @@ type Props = { params: Promise<{id:string}>; searchParams: Promise<{error?:strin
 type ImageRow = { id:string; storage_bucket:"seller-uploads"|"watch-images"; storage_path:string; position:number; is_primary:boolean; alt_text:string|null };
 const errors: Record<string,string> = {
   details:"Check the required listing details.",
-  save:"Listing details could not be saved.",
+  save:"Listing details could not be saved. Check the required fields and try again.",
+  schema:"The database is missing the latest listing fields. Apply migration 20261012000500_listing_year_and_set_contents.sql in Supabase, then retry.",
   images:"Image metadata could not be saved.",
   upload:"An image could not be uploaded. Check the file type and size.",
   publish:"The listing could not be published.",
