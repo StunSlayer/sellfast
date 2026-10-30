@@ -11,7 +11,7 @@ export default async function AdminHomepagePage({searchParams}:Props){
  const p=await searchParams;
  const db=await createClient();
  const {data:rows}=await db.from("homepage_media").select("slot,storage_path,alt_text,updated_at");
- const media=new Map((rows||[]).map(row=>[row.slot,row]));
+ const media=Object.fromEntries((rows||[]).map(row=>[row.slot,row])) as Record<string,{slot:string;storage_path:string;alt_text:string|null;updated_at:string}>;
  const errorText=p.error==="file"?"Choose a JPEG, PNG or WebP image up to 10 MB.":p.error==="upload"?"The image could not be uploaded to Supabase Storage.":p.error==="save"?"The image settings could not be saved. Check that the homepage media migration has been applied.": "The requested change could not be completed.";
  return <>
   <div className="admin-heading"><div><div className="eyebrow">Storefront appearance</div><h1>Homepage images</h1><p>Replace the stock photographs used on the Sellfast landing page. Changes go live as soon as they are saved.</p></div></div>
