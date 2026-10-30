@@ -20,7 +20,7 @@ export default async function AdminHomepagePage({searchParams}:Props){
   {p.removed?<div className="notice">Custom homepage image removed. The original fallback image is now in use.</div>:null}
   <div className="homepage-media-grid">
    {slotDetails.map(item=>{
-    const current=media.get(item.slot);
+    const current=media[item.slot];
     const imageUrl=current?db.storage.from("site-media").getPublicUrl(current.storage_path).data.publicUrl:null;
     return <section className="panel homepage-media-card" key={item.slot}>
      <div className="eyebrow">Image slot · {item.slot==="hero"?"01":"02"}</div>
