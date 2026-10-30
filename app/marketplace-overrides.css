@@ -170,3 +170,18 @@
 .validation-attempted .form-field:has(:invalid) input:focus,
 .validation-attempted .form-field:has(:invalid) select:focus,
 .validation-attempted .form-field:has(:invalid) textarea:focus{outline:2px solid rgba(196,61,54,.18);outline-offset:1px}
+
+/* Admin-managed homepage imagery */
+.hero-custom-image{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;object-position:center 47%}
+.hero-managed-image:before{z-index:1;background-image:linear-gradient(90deg,rgba(20,26,22,.97) 0%,rgba(20,26,22,.88) 38%,rgba(20,26,22,.15) 100%)}
+.hero-managed-image .hero-content{z-index:2}
+.homepage-media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.homepage-media-card{min-width:0}
+.homepage-media-card h2{margin:10px 0;font:27px/1.2 Georgia,serif}
+.homepage-media-card>p{min-height:42px;color:var(--muted);font-size:11px;line-height:1.7}
+.homepage-media-preview{width:100%;aspect-ratio:16/9;margin:17px 0;overflow:hidden;background:#eeede6;border:1px solid var(--line)}
+.homepage-media-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.homepage-media-placeholder{display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;margin:17px 0;padding:25px;background:#eeede6;border:1px dashed #c9c8bd;color:var(--muted);font-size:11px;text-align:center}
+.homepage-media-form{border-top:1px solid var(--line);padding-top:17px}
+.homepage-media-remove{margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+@media(max-width:760px){.homepage-media-grid{grid-template-columns:1fr;gap:12px}.homepage-media-card{padding:16px}.homepage-media-card h2{font-size:24px}}
