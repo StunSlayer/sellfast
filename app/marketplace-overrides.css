@@ -185,3 +185,10 @@
 .homepage-media-form{border-top:1px solid var(--line);padding-top:17px}
 .homepage-media-remove{margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
 @media(max-width:760px){.homepage-media-grid{grid-template-columns:1fr;gap:12px}.homepage-media-card{padding:16px}.homepage-media-card h2{font-size:24px}}
+
+/* Permanent inventory deletion confirmation */
+.delete-listing-form{margin:0}
+.delete-listing-form>button{display:inline-flex;align-items:center;gap:5px}
+.delete-listing-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:190px;max-width:300px;padding:9px;background:#f7e9e7;border:1px solid #d8b7b1}
+.delete-listing-confirm span{flex:1 0 100%;font-size:10px;line-height:1.5;color:#81352d}
+.delete-listing-confirm button{font-size:9px}
