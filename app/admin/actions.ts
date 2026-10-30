@@ -198,3 +198,111 @@ export async function removeHomepageImage(form:FormData){
  revalidatePath("/admin/homepage");
  redirect("/admin/homepage?removed="+slot);
 }
+
+type ListingImageStorageRef = { storage_bucket: "seller-uploads" | "watch-images"; storage_path: string };
+
+async function collectStorageFolderFiles(
+ db: Awaited<ReturnType<typeof createClient>>,
+ bucket: "seller-uploads" | "watch-images",
+ prefix: string,
+): Promise<string[]> {
+ if (!prefix) return [];
+ const { data, error } = await db.storage.from(bucket).list(prefix, { limit: 1000 });
+ if (error) {
+  console.error("[Sellfast] could not list listing image folder", { bucket, prefix, message: error.message });
+  throw new Error("Could not verify every linked image file before deletion.");
+ }
+ return (data || [])
+  .filter((entry) => entry.id !== null)
+  .map((entry) => prefix + "/" + entry.name);
+}
+
+export async function deleteAdminListing(form: FormData) {
+ const { db } = await requireAdmin();
+ const id = safeText(form, "listing_id", 60);
+ if (!id) redirect("/admin/listings?error=delete-missing");
+
+ const { data: listing, error: listingReadError } = await db
+  .from("listings")
+  .select("id,title,slug,seller_id,created_by")
+  .eq("id", id)
+  .maybeSingle();
+
+ if (listingReadError || !listing) {
+  console.error("[Sellfast] listing delete lookup failed", { id, message: listingReadError?.message });
+  redirect("/admin/listings?error=delete-missing");
+ }
+
+ const { data: imageRows, error: imageReadError } = await db
+  .from("listing_images")
+  .select("storage_bucket,storage_path")
+  .eq("listing_id", id);
+
+ if (imageReadError) {
+  console.error("[Sellfast] listing image lookup failed", { id, message: imageReadError.message });
+  redirect("/admin/listings?error=delete-images");
+ }
+
+ const filesByBucket: Record<"seller-uploads" | "watch-images", Set<string>> = {
+  "seller-uploads": new Set<string>(),
+  "watch-images": new Set<string>(),
+ };
+
+ for (const image of (imageRows || []) as ListingImageStorageRef[]) {
+  if (image.storage_bucket !== "seller-uploads" && image.storage_bucket !== "watch-images") {
+   console.error("[Sellfast] unexpected storage bucket on listing image", { id, bucket: image.storage_bucket });
+   redirect("/admin/listings?error=delete-images");
+  }
+  filesByBucket[image.storage_bucket].add(image.storage_path);
+ }
+
+ // Also inspect the listing-specific folders so uploads left behind by a failed
+ // image-metadata insert are cleaned up along with the linked image records.
+ try {
+  const publicFiles = await collectStorageFolderFiles(db, "watch-images", id);
+  publicFiles.forEach((path) => filesByBucket["watch-images"].add(path));
+
+  const privatePrefixes = new Set<string>();
+  if (listing.created_by) privatePrefixes.add(listing.created_by + "/" + id);
+  if (listing.seller_id) privatePrefixes.add(listing.seller_id + "/" + id);
+  for (const prefix of privatePrefixes) {
+   const privateFiles = await collectStorageFolderFiles(db, "seller-uploads", prefix);
+   privateFiles.forEach((path) => filesByBucket["seller-uploads"].add(path));
+  }
+ } catch {
+  redirect("/admin/listings?error=delete-storage");
+ }
+
+ // Remove actual objects before deleting the database row. If cleanup fails, keep
+ // the listing record so the remaining files can be reviewed and retried.
+ for (const bucket of ["seller-uploads", "watch-images"] as const) {
+  const paths = Array.from(filesByBucket[bucket]);
+  for (let offset = 0; offset < paths.length; offset += 100) {
+   const batch = paths.slice(offset, offset + 100);
+   if (!batch.length) continue;
+   const { error } = await db.storage.from(bucket).remove(batch);
+   if (error) {
+    console.error("[Sellfast] listing image storage deletion failed", { id, bucket, message: error.message });
+    redirect("/admin/listings?error=delete-storage");
+   }
+  }
+ }
+
+ // listing_images cascade on listing deletion; inquiries deliberately survive with
+ // listing_id set to NULL, preserving the admin's customer lead history.
+ const { error: deleteError } = await db.from("listings").delete().eq("id", id);
+ if (deleteError) {
+  console.error("[Sellfast] listing database deletion failed", { id, message: deleteError.message });
+  redirect("/admin/listings?error=delete-db");
+ }
+
+ revalidatePath("/admin/listings");
+ revalidatePath("/admin");
+ revalidatePath("/admin/inquiries");
+ revalidatePath("/seller/dashboard");
+ revalidatePath("/");
+ revalidatePath("/watches");
+ revalidatePath("/sitemap.xml");
+ if (listing.slug) revalidatePath("/watches/" + listing.slug);
+ redirect("/admin/listings?deleted=1");
+}
