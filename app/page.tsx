@@ -18,12 +18,27 @@ const popularBrands: Brand[] = [
 export default async function HomePage() {
   let listings: Listing[] = [];
   let brands: Brand[] = popularBrands;
+  let heroImageUrl: string | null = null;
+  let heroImageAlt = "Luxury watch collection";
+  let sellFeatureImageUrl: string | null = null;
+  let sellFeatureImageAlt = "Luxury watch available to sell or trade";
   if (hasSupabaseConfig()) {
     const supabase = await createClient();
     const { data } = await supabase.from("listings").select("*, brand:brands(name, slug), listing_images(*)").eq("status", "published").eq("availability", "available").order("published_at", { ascending: false, nullsFirst: false }).limit(8);
     listings = (data || []) as unknown as Listing[];
     const { data: rows } = await supabase.from("brands").select("id,name,slug,sort_order").eq("is_active", true).order("sort_order").limit(12);
     if (rows?.length) brands = rows as Brand[];
+    const { data: homepageMedia } = await supabase.from("homepage_media").select("slot,storage_path,alt_text").in("slot", ["hero","sell_feature"]);
+    for (const media of homepageMedia || []) {
+      const publicUrl = supabase.storage.from("site-media").getPublicUrl(media.storage_path).data.publicUrl;
+      if (media.slot === "hero") {
+        heroImageUrl = publicUrl;
+        heroImageAlt = media.alt_text || heroImageAlt;
+      } else if (media.slot === "sell_feature") {
+        sellFeatureImageUrl = publicUrl;
+        sellFeatureImageAlt = media.alt_text || sellFeatureImageAlt;
+      }
+    }
   }
   const imageUrls = new Map<string, string>();
   if (hasSupabaseConfig() && listings.length) {
@@ -34,7 +49,7 @@ export default async function HomePage() {
   return <>
     <SiteHeader />
     <main>
-      <section className="hero"><div className="hero-content">
+      <section className={"hero"+(heroImageUrl?" hero-managed-image":"")}>{heroImageUrl?<img className="hero-custom-image" src={heroImageUrl} alt={heroImageAlt}/>:null}<div className="hero-content">
         <div className="eyebrow">The art of choosing well</div>
         <h1 className="display">Exceptional watches.<br /><em>Extraordinary stories.</em></h1>
         <p className="hero-copy">A considered collection of fine timepieces, thoughtfully sourced for those who know what matters. Discover, enquire, sell or trade with Sellfast.</p>
@@ -55,7 +70,7 @@ export default async function HomePage() {
         <div className="section-head"><div><div className="eyebrow">A world of watchmaking</div><h2 className="display">Shop by brand</h2><p>Explore enduring icons and independent visionaries.</p></div><Link href="/watches" className="text-link">Browse collection <ArrowRight size={14}/></Link></div>
         <div className="brand-grid">{brands.slice(0,12).map((brand) => <Link href={"/watches?brand="+brand.slug} className="brand-tile" key={brand.id}><span className="brand-monogram">{brand.name.split(/[\s&]+/).filter(Boolean).map((part)=>part[0]).slice(0,2).join("")}</span><span>{brand.name}</span></Link>)}</div>
       </div></section>
-      <section className="section"><div className="container split-feature"><div className="split-art" role="img" aria-label="Close-up of a luxury wristwatch"/><div className="split-copy"><div><div className="eyebrow">Your next chapter</div><h2 className="display">Ready for a different wrist?</h2><p>Sell or trade your watch with a team that understands the details. Share the reference, condition and what comes with it. We will review the information and get back to you personally.</p><Link className="button button-light" href="/sell-your-watch">Start an enquiry <ArrowRight size={14}/></Link></div></div></div></section>
+      <section className="section"><div className="container split-feature"><div className="split-art" role="img" aria-label={sellFeatureImageAlt} style={sellFeatureImageUrl?{backgroundImage:`url("${sellFeatureImageUrl}")`}:undefined}/><div className="split-copy"><div><div className="eyebrow">Your next chapter</div><h2 className="display">Ready for a different wrist?</h2><p>Sell or trade your watch with a team that understands the details. Share the reference, condition and what comes with it. We will review the information and get back to you personally.</p><Link className="button button-light" href="/sell-your-watch">Start an enquiry <ArrowRight size={14}/></Link></div></div></div></section>
       <section className="section-tight"><div className="container"><div className="section-head"><div><div className="eyebrow">Simple by design</div><h2 className="display">A more personal way to buy</h2></div></div><div className="process-grid">
         <div className="process-item"><span className="process-number">01</span><h3>Discover</h3><p>Explore available watches and open each listing for its details, condition and reference.</p></div>
         <div className="process-item"><span className="process-number">02</span><h3>Ask the right questions</h3><p>Message the concierge about availability, further photographs or to arrange a viewing.</p></div>
