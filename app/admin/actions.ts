@@ -131,3 +131,70 @@ export async function toggleBrand(form:FormData){
  const {error}=await db.from("brands").update({is_active:!active}).eq("id",id);
  if(error)redirect("/admin/brands?error=update");revalidatePath("/");revalidatePath("/watches");redirect("/admin/brands?updated=1");
 }
+
+export async function deleteBrand(form:FormData){
+ const {db}=await requireAdmin();
+ const id=safeText(form,"brand_id",60);
+ if(!id)redirect("/admin/brands?error=update");
+ const {count,error:countError}=await db.from("listings").select("id",{count:"exact",head:true}).eq("brand_id",id);
+ if(countError)redirect("/admin/brands?error=update");
+ if((count||0)>0)redirect("/admin/brands?error=in-use");
+ const {error}=await db.from("brands").delete().eq("id",id);
+ if(error)redirect("/admin/brands?error=update");
+ revalidatePath("/");
+ revalidatePath("/watches");
+ revalidatePath("/admin/brands");
+ redirect("/admin/brands?removed=1");
+}
+
+const homepageSlots = ["hero","sell_feature"] as const;
+type HomepageSlot = typeof homepageSlots[number];
+
+function safeImageFile(file: File) {
+ return file.size > 0
+  && file.size <= 10 * 1024 * 1024
+  && ["image/jpeg","image/png","image/webp"].includes(file.type);
+}
+
+export async function saveHomepageImage(form:FormData){
+ const {db,user}=await requireAdmin();
+ const slot=safeText(form,"slot",30) as HomepageSlot;
+ if(!homepageSlots.includes(slot))redirect("/admin/homepage?error=slot");
+ const file=form.get("image");
+ const alt=safeText(form,"alt_text",250);
+ if(!(file instanceof File)||!safeImageFile(file))redirect("/admin/homepage?error=file");
+ const {data:old}=await db.from("homepage_media").select("storage_path").eq("slot",slot).maybeSingle();
+ const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+ const path=slot+"/"+randomUUID()+"."+ext;
+ const {error:uploadError}=await db.storage.from("site-media").upload(path,file,{contentType:file.type,upsert:false});
+ if(uploadError)redirect("/admin/homepage?error=upload");
+ const {error:saveError}=await db.from("homepage_media").upsert({
+  slot,
+  storage_path:path,
+  alt_text:alt||(slot==="hero"?"Sellfast luxury watch collection":"Sellfast watch selling and trading"),
+  updated_by:user.id,
+ },{onConflict:"slot"});
+ if(saveError){
+  await db.storage.from("site-media").remove([path]);
+  console.error("[Sellfast] homepage media save failed",{code:saveError.code,message:saveError.message});
+  redirect("/admin/homepage?error=save");
+ }
+ if(old?.storage_path)await db.storage.from("site-media").remove([old.storage_path]);
+ revalidatePath("/");
+ revalidatePath("/admin/homepage");
+ redirect("/admin/homepage?saved="+slot);
+}
+
+export async function removeHomepageImage(form:FormData){
+ const {db}=await requireAdmin();
+ const slot=safeText(form,"slot",30) as HomepageSlot;
+ if(!homepageSlots.includes(slot))redirect("/admin/homepage?error=slot");
+ const {data:old,error:readError}=await db.from("homepage_media").select("storage_path").eq("slot",slot).maybeSingle();
+ if(readError)redirect("/admin/homepage?error=save");
+ const {error}=await db.from("homepage_media").delete().eq("slot",slot);
+ if(error)redirect("/admin/homepage?error=save");
+ if(old?.storage_path)await db.storage.from("site-media").remove([old.storage_path]);
+ revalidatePath("/");
+ revalidatePath("/admin/homepage");
+ redirect("/admin/homepage?removed="+slot);
+}
